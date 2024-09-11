@@ -80,6 +80,35 @@ def main_keyboard() -> ReplyKeyboardMarkup:
     )
     return keyboard
 
+
+def check_keyboard() -> ReplyKeyboardMarkup:
+    kb = [
+        [
+            KeyboardButton(text="Привязал"),
+
+        ]
+    ]
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True
+    )
+    return keyboard
+
+
+def getout_keyboard() -> ReplyKeyboardMarkup:
+    kb = [
+        [
+            KeyboardButton(text="Главное меню"),
+
+        ]
+    ]
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True
+    )
+    return keyboard
+
+
 '''
 #------------------Создание клавиатуры для просмотреных фильмов/сериалов----------------------
 def viewed_keyboard() -> InlineKeyboardMarkup:

@@ -4,7 +4,7 @@ from sqlalchemy.orm import DeclarativeBase, relationship, sessionmaker
 from sqlalchemy.ext.asyncio import AsyncAttrs, create_async_engine, AsyncSession
 
 
-engine = create_async_engine('postgresql+asyncpg://postgres:0000@localhost:5432/postgre')
+engine = create_async_engine('postgresql+asyncpg://postgres:2005@localhost:5432/postgres')
 Session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
@@ -14,8 +14,8 @@ class Base(AsyncAttrs, DeclarativeBase):
 
 
 #------------------Создание модели для Пользователя----------------------
-class User(Base):
-    __tablename__ = 'User'
+class UserMunSteam(Base):
+    __tablename__ = 'UserMunSteam'
     telegram_id = Column(String, primary_key=True, unique=True)
     steam_id = Column(String, default=None)
 

@@ -1,10 +1,9 @@
 import asyncio
 import sys
-import os
 import logging
 from aiogram import Bot, Dispatcher
-from handlers import router
-from models import async_main
+from app.handlers import router
+from app.models import async_main
 
 
 async def main() -> None:

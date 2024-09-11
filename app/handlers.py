@@ -1,45 +1,60 @@
+from datetime import datetime
+
 from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.types import Message, CallbackQuery
-from keyboards import main_keyboard
-from models import Session, User
 from sqlalchemy import func
 from sqlalchemy.future import select
-from datetime import datetime
+
+from app.service import fetch, get_profile_url
+from app.keyboards import main_keyboard, check_keyboard
+from app.models import Session, UserMunSteam
 
 router = Router()
 
 
 #------------------Начало работы бота с команды /start----------------------
-@router.message(CommandStart())
+@router.message(lambda call: call.text=='/start' or call.text=='Главное меню')
 async def command_start(message: Message) -> None:
     async with Session() as session:
         async with session.begin():
             # Проверяем, существует ли пользователь
-            stmt = select(User).filter_by(telegram_id=str(message.from_user.id))
+            stmt = select(UserMunSteam).filter_by(telegram_id=str(message.from_user.id))
             result = await session.execute(stmt)
             user = result.scalars().first()
 
             # Если пользователь не существует, создаем его
             if not user:
-                user = User(id_user=str(message.from_user.id))
+                user = UserMunSteam(telegram_id=str(message.from_user.id))
                 session.add(user)
                 await session.commit()  # Сохраняем изменения
 
-    await message.answer(f"🎬 Привет! Я бот, который собирает твои данные с сайта munsteam.ru ",
+    await message.answer(f"Привет! Я бот, который собирает твои данные с сайта munsteam.ru ",
                          reply_markup=main_keyboard())
 
 
 #------------------Выбор фильма/сериала----------------------
 @router.message(F.text == 'Привязать аккаунт')
 async def command_start_handler(message: Message) -> None:
-    await message.answer(f"Перейди по ссылке и войдите в свой аккаунт https://127.0.0.1:8000/user/login/?telegram_id={message.from_user.id}",)
+    await message.answer(f"Перейди по ссылке и войдите в свой аккаунт https://munsteam.ru/user/profile/?telegram_id={message.from_user.id}", reply_markup=check_keyboard())
 
+
+@router.message(F.text == 'Привязал')
+async def command_start_handler(message: Message) -> None:
+    await fetch(message)
 
 #------------------Профиль пользователя со статистикой----------------------
 @router.message(F.text == 'Профиль👤')
 async def get_profile_user(message: Message):
-    await message.answer(f"Ваш профиль, {message.from_user.full_name} 👤\n")
+    async with Session() as session:
+        async with session.begin():
+            stmt = select(UserMunSteam).filter_by(telegram_id=str(message.from_user.id))
+            result = await session.execute(stmt)
+            user = result.scalars().first()
+            if user.steam_id is not None:
+                await get_profile_url(message, user.steam_id)
+            else:
+                await message.answer(f"Ваш профиль, {message.from_user.full_name} 👤\n")
 
 
 '''#------------------Просмотренные фильмы/сериалы----------------------
