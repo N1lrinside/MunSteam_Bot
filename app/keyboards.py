@@ -67,7 +67,7 @@ def serials_keyboard(is_answer: bool) -> InlineKeyboardMarkup:
 def main_keyboard() -> ReplyKeyboardMarkup:
     kb = [
         [
-            KeyboardButton(text="Статистика по CS2"),
+            KeyboardButton(text="Статистика по CS2⚔️"),
             KeyboardButton(text="Профиль👤")
         ],
         [

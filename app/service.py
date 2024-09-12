@@ -9,7 +9,7 @@ from app.models import Session, UserMunSteam
 
 
 async def fetch(message):
-    url = 'https://munsteam.ru/user/api/user/telegram/'
+    url = 'https://munsteam.ru/user/api/telegram/'
     params = {'format': 'json', 'telegram_id': message.from_user.id}
     async with aiohttp.ClientSession() as session:
         async with session.get(url, params=params) as response:
@@ -30,7 +30,7 @@ async def fetch(message):
 
 
 async def get_profile_url(message, steam_id):
-    url = 'https://www.munsteam.ru/user/api/user/steam_info/'
+    url = 'https://www.munsteam.ru/user/api/steam_info/'
     params = {'format': 'json', 'steam_id': steam_id}
     async with aiohttp.ClientSession() as session:
         async with session.get(url, params=params) as response:
@@ -69,3 +69,33 @@ async def save_steam_id_to_db(message, steam_id):
                 await session.commit()
             else:
                 await message.answer("Пользователь не найден в базе данных.")
+
+
+async def get_stats_user(message, steam_id):
+    url = 'https://www.munsteam.ru/statistic/api/user_statistic/'
+    params = {'format': 'json', 'user_steam_id': steam_id}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params) as response:
+            if response.status == 200:
+                data = await response.json()
+                data_dict = {k: v for k, v in data[0].items()}
+                stats_message = (
+                    f"*Общее количество убийств*: {data_dict['total_kills']}\n"
+                    f"*Общее количество смертей*: {data_dict['total_deaths']}\n"
+                    f"*Время в игре*: {data_dict['time_played_hours']}\n"
+                    f"*Закладка бомб*: {data_dict['total_planted_bombs']}\n"
+                    f"*Разминирование бомб*: {data_dict['total_defused_bombs']}\n"
+                    f"*Общий урон*: {data_dict['total_damage_done']}\n"
+                    f"*Заработанные деньги*: {data_dict['money_earned']}\n"
+                    f"*Победы в пистолетных раундах*: {data_dict['total_wins_pistolround']}\n"
+                    f"*MVP*: {data_dict['total_mvps']}\n"
+                    f"*Выигранные матчи*: {data_dict['total_matches_won']}\n"
+                    f"*Сыгранные матчи*: {data_dict['total_matches_played']}\n"
+                )
+                if data:
+                    await message.answer(stats_message, parse_mode='MarkdownV2')
+                else:
+                    await message.answer("Не получилось получить данные :(")
+            else:
+                await message.answer(f"Не удалось привязать аккаунт. Статус: {response.status}")
+
