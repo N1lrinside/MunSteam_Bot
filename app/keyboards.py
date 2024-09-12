@@ -1,44 +1,23 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
 import json
 
-'''
-#------------------Создание клавиатуры для выбора фильма/сериала----------------------
-def choise_keyboard() -> InlineKeyboardMarkup:
-    commands = ['Фильмы', 'Сериалы']
-    buttons = []
-    for command in commands:
-        if command == 'Фильмы':
-            buttons.append(InlineKeyboardButton(text=command, callback_data='films'))
-        if command == 'Сериалы':
-            buttons.append(InlineKeyboardButton(text=command, callback_data='serials'))
-    inline_keyboard = InlineKeyboardMarkup(inline_keyboard=[buttons])
-    return inline_keyboard
 
-
-#------------------Создание клавиатуры для подбора фильма----------------------
-def films_keyboard(is_answer: bool) -> InlineKeyboardMarkup:
-    with open('genres_of_films.json', 'r', encoding='utf-8') as f:
-        genre_of_films = json.load(f)
-    inline_buttons = [[] for _ in range(int(len(genre_of_films) / 4) + 1)]
+def games_keyboard(data_dict) -> InlineKeyboardMarkup:
+    inline_buttons = [[] for _ in range(int(len(data_dict) / 4) + 1)]
     index = 0
-    for name, id_films in genre_of_films.items():
+    for game_name, game_id in data_dict.items():
         if len(inline_buttons[index]) == 4:
             index += 1
-            inline_buttons[index].append(InlineKeyboardButton(text=name.capitalize(), callback_data=f'f{id_films}'))
+            inline_buttons[index].append(InlineKeyboardButton(text=game_name, callback_data=f'{game_id}'))
         else:
-            inline_buttons[index].append(InlineKeyboardButton(text=name.capitalize(), callback_data=f'f{id_films}'))
-    viewed_or_favorite = []
+            inline_buttons[index].append(InlineKeyboardButton(text=game_name, callback_data=f'{game_id}'))
     back = []
-    if is_answer:
-        viewed_or_favorite.append(InlineKeyboardButton(text='В избранное ⭐️', callback_data='lffavorite'))
-        viewed_or_favorite.append(InlineKeyboardButton(text='Смотрел 👁‍', callback_data='mfwatched'))
-        viewed_or_favorite.append(InlineKeyboardButton(text='Неинтересно', callback_data='nonfinteresting'))
     back.append(InlineKeyboardButton(text='🔙 Главное меню', callback_data='menu'))
-    buttons = [*inline_buttons, viewed_or_favorite, back]
+    buttons = [*inline_buttons, back]
     inline_keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     return inline_keyboard
 
-
+'''
 #------------------Создание клавиатуры для выбора сериала----------------------
 def serials_keyboard(is_answer: bool) -> InlineKeyboardMarkup:
     with open('genres_of_serials.json', 'r', encoding='utf-8') as f:
@@ -63,14 +42,17 @@ def serials_keyboard(is_answer: bool) -> InlineKeyboardMarkup:
     return inline_keyboard
 
 '''
+
+
 #------------------Создание клавиатуры для главной страницы----------------------
 def main_keyboard() -> ReplyKeyboardMarkup:
     kb = [
         [
             KeyboardButton(text="Статистика по CS2⚔️"),
-            KeyboardButton(text="Профиль👤")
+            KeyboardButton(text="Достижения📋")
         ],
         [
+            KeyboardButton(text="Профиль👤"),
             KeyboardButton(text="Привязать аккаунт"),
         ]
     ]

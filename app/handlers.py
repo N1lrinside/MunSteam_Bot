@@ -6,7 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from sqlalchemy import func
 from sqlalchemy.future import select
 
-from app.service import fetch, get_profile_url, get_stats_user
+from app.service import fetch, get_profile_url, get_stats_user, get_games_user
 from app.keyboards import main_keyboard, check_keyboard
 from app.models import Session, UserMunSteam
 
@@ -66,6 +66,22 @@ async def get_profile_user(message: Message):
             user = result.scalars().first()
             if user.steam_id is not None:
                 await get_stats_user(message, user.steam_id)
+            else:
+                await message.answer(f"У вас не привязан аккаунт")
+                await message.answer(
+                    f"Перейди по ссылке и войдите в свой аккаунт https://munsteam.ru/user/profile/?telegram_id={message.from_user.id}",
+                    reply_markup=check_keyboard())
+
+
+@router.message(F.text == 'Достижения📋')
+async def get_profile_user(message: Message):
+    async with Session() as session:
+        async with session.begin():
+            stmt = select(UserMunSteam).filter_by(telegram_id=str(message.from_user.id))
+            result = await session.execute(stmt)
+            user = result.scalars().first()
+            if user.steam_id is not None:
+                await get_games_user(message, user.steam_id)
             else:
                 await message.answer(f"У вас не привязан аккаунт")
                 await message.answer(

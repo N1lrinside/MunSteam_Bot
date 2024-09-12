@@ -4,7 +4,7 @@ import locale
 from datetime import datetime
 from sqlalchemy.future import select
 
-from app.keyboards import getout_keyboard
+from app.keyboards import getout_keyboard, games_keyboard
 from app.models import Session, UserMunSteam
 
 
@@ -99,3 +99,18 @@ async def get_stats_user(message, steam_id):
             else:
                 await message.answer(f"Не удалось привязать аккаунт. Статус: {response.status}")
 
+
+async def get_games_user(message, steam_id):
+    url = 'https://www.munsteam.ru/achievements/api/achievements/gamesuser/'
+    params = {'format': 'json', 'user_steam_id': steam_id}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params) as response:
+            if response.status == 200:
+                data = await response.json()
+                data_dict = {v: k for k, v in data[0]['games'].items()}
+                if data:
+                    await message.answer(f'Выберите игру по которой хотите получить достижения!', reply_markup=games_keyboard(data_dict))
+                else:
+                    await message.answer("Не получилось получить данные :(")
+            else:
+                await message.answer(f"Не удалось получить данные. Статус: {response.status}")
