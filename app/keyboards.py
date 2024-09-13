@@ -8,9 +8,25 @@ def games_keyboard(data_dict) -> InlineKeyboardMarkup:
     for game_name, game_id in data_dict.items():
         if len(inline_buttons[index]) == 4:
             index += 1
-            inline_buttons[index].append(InlineKeyboardButton(text=game_name, callback_data=f'{game_id}'))
+            inline_buttons[index].append(InlineKeyboardButton(text=game_name, callback_data=f'g{int(game_id)}'))
         else:
-            inline_buttons[index].append(InlineKeyboardButton(text=game_name, callback_data=f'{game_id}'))
+            inline_buttons[index].append(InlineKeyboardButton(text=game_name, callback_data=f'g{int(game_id)}'))
+    back = []
+    back.append(InlineKeyboardButton(text='🔙 Главное меню', callback_data='menu'))
+    buttons = [*inline_buttons, back]
+    inline_keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return inline_keyboard
+
+
+def achievements_keyboard(achievement, app_id) -> InlineKeyboardMarkup:
+    inline_buttons = [[] for _ in range(int(len(achievement) / 4) + 1)]
+    index = 0
+    for game in achievement:
+        if len(inline_buttons[index]) == 4:
+            index += 1
+            inline_buttons[index].append(InlineKeyboardButton(text=game['name'], callback_data=f'{game['name']}+{app_id}'))
+        else:
+            inline_buttons[index].append(InlineKeyboardButton(text=game['name'], callback_data=f'{game['name']}+{app_id}'))
     back = []
     back.append(InlineKeyboardButton(text='🔙 Главное меню', callback_data='menu'))
     buttons = [*inline_buttons, back]

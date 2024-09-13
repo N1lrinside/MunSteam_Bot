@@ -4,7 +4,7 @@ import locale
 from datetime import datetime
 from sqlalchemy.future import select
 
-from app.keyboards import getout_keyboard, games_keyboard
+from app.keyboards import getout_keyboard, games_keyboard, achievements_keyboard
 from app.models import Session, UserMunSteam
 
 
@@ -114,3 +114,36 @@ async def get_games_user(message, steam_id):
                     await message.answer("Не получилось получить данные :(")
             else:
                 await message.answer(f"Не удалось получить данные. Статус: {response.status}")
+
+
+async def get_achievements_game(callback, steam_id, app_id):
+    url = 'https://www.munsteam.ru/achievements/api/achievements/achievementsgame/'
+    params = {'format': 'json', 'user_steam_id': steam_id, 'app_id': app_id}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params) as response:
+            if response.status == 200:
+                data = await response.json()
+                if data:
+                    app_id = data[0]['app_id']
+                    achievements = [i for i in data[0]['achievements']]
+                    await callback.message.answer(f'Выберите достижение! {achievements}', reply_markup=achievements_keyboard(achievements, app_id))
+                else:
+                    await callback.message.answer("Нет данных об игре, возможно вы не смотрели достижения об этой игре на сайте!")
+            else:
+                await callback.message.answer(f"Не удалось получить данные. Статус: {response.status}")
+
+
+async def get_description_game(callback, steam_id, app_id, name_achievement):
+    url = 'https://www.munsteam.ru/achievements/api/achievements/achievementsgame/'
+    params = {'format': 'json', 'user_steam_id': steam_id, 'app_id': app_id}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params) as response:
+            if response.status == 200:
+                data = await response.json()
+                if data:
+                    achievements = [i for i in data[0]['achievements'] if i['name'] == name_achievement]
+                    await callback.message.answer(f'Выберите достижение! {achievements}')
+                else:
+                    await callback.message.answer("Нет данных об игре, возможно вы не смотрели достижения об этой игре на сайте!")
+            else:
+                await callback.message.answer(f"Не удалось получить данные. Статус: {response.status}")

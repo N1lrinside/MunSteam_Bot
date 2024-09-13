@@ -6,7 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from sqlalchemy import func
 from sqlalchemy.future import select
 
-from app.service import fetch, get_profile_url, get_stats_user, get_games_user
+from app.service import fetch, get_profile_url, get_stats_user, get_games_user, get_achievements_game, get_description_game
 from app.keyboards import main_keyboard, check_keyboard
 from app.models import Session, UserMunSteam
 
@@ -89,6 +89,39 @@ async def get_profile_user(message: Message):
                     reply_markup=check_keyboard())
 
 
+@router.callback_query(lambda call: call.data[0] == 'g')
+async def get_achievements_games(callback: CallbackQuery):
+    async with Session() as session:
+        async with session.begin():
+            stmt = select(UserMunSteam).filter_by(telegram_id=str(callback.from_user.id))
+            result = await session.execute(stmt)
+            user = result.scalars().first()
+            if user.steam_id is not None:
+                await get_achievements_game(callback, user.steam_id, callback.data[1:])
+            else:
+                await callback.message.answer(f"У вас не привязан аккаунт")
+                await callback.message.answer(
+                    f"Перейди по ссылке и войдите в свой аккаунт https://munsteam.ru/user/profile/?telegram_id={callback.from_user.id}",
+                    reply_markup=check_keyboard())
+
+@router.callback_query(lambda call: '+' in call.data)
+async def get_description_achievement(callback: CallbackQuery):
+    async with Session() as session:
+        async with session.begin():
+            stmt = select(UserMunSteam).filter_by(telegram_id=str(callback.from_user.id))
+            result = await session.execute(stmt)
+            user = result.scalars().first()
+            index_plus = callback.data.index('+')
+            if user.steam_id is not None:
+                await get_description_game(callback, user.steam_id, callback.data[index_plus + 1:], callback.data[:index_plus])
+            else:
+                await callback.message.answer(f"У вас не привязан аккаунт")
+                await callback.message.answer(
+                    f"Перейди по ссылке и войдите в свой аккаунт https://munsteam.ru/user/profile/?telegram_id={callback.from_user.id}",
+                    reply_markup=check_keyboard())
+@router.callback_query(F.data == 'menu')
+async def going_to_menu(callback: CallbackQuery):
+    await command_start(callback.message)
 '''#------------------Просмотренные фильмы/сериалы----------------------
 @router.message(F.text == 'Просмотренные фильмы/сериалы 📺')
 async def check_viewed(message: Message):
