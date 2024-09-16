@@ -1,4 +1,5 @@
 import asyncio
+import os
 import sys
 import logging
 from aiogram import Bot, Dispatcher
@@ -8,7 +9,7 @@ from app.models import async_main
 
 async def main() -> None:
     await async_main()
-    bot = Bot(token='7274769206:AAEcDxVPhbmChHLdZFuhrz40BRNQEd-pJzE')
+    bot = Bot(token=os.environ.get('TG_TOKEN'))
     dp = Dispatcher()
     dp.include_router(router)
     await dp.start_polling(bot)

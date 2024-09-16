@@ -1,10 +1,10 @@
 import os
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, Boolean
-from sqlalchemy.orm import DeclarativeBase, relationship, sessionmaker
+from sqlalchemy import Column, String
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from sqlalchemy.ext.asyncio import AsyncAttrs, create_async_engine, AsyncSession
 
 
-engine = create_async_engine('postgresql+asyncpg://postgres:2005@localhost:5432/postgres')
+engine = create_async_engine(os.environ.get('URL_DB'))
 Session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 

@@ -4,7 +4,7 @@ import locale
 from datetime import datetime
 from sqlalchemy.future import select
 
-from app.keyboards import getout_keyboard, games_keyboard, achievements_keyboard
+from app.keyboards import getout_keyboard, games_keyboard, achievements_keyboard, friends_keyboard
 from app.models import Session, UserMunSteam
 
 
@@ -126,7 +126,7 @@ async def get_achievements_game(callback, steam_id, app_id):
                 if data:
                     app_id = data[0]['app_id']
                     achievements = [i for i in data[0]['achievements']]
-                    await callback.message.answer(f'Выберите достижение! {achievements}', reply_markup=achievements_keyboard(achievements, app_id))
+                    await callback.message.answer(f'Выберите достижение!', reply_markup=achievements_keyboard(achievements, app_id))
                 else:
                     await callback.message.answer("Нет данных об игре, возможно вы не смотрели достижения об этой игре на сайте!")
             else:
@@ -142,8 +142,50 @@ async def get_description_game(callback, steam_id, app_id, name_achievement):
                 data = await response.json()
                 if data:
                     achievements = [i for i in data[0]['achievements'] if i['name'] == name_achievement]
-                    await callback.message.answer(f'Выберите достижение! {achievements}')
+                    achievements_message = (
+                        f"*Название достижения*: {achievements[0]['name']}\n"
+                        f"*Описание*: {achievements[0]['description'] if achievements[0]['description'] else 'Описание отсутсвует'}\n"
+                        f"*Получено*: {'Да' if achievements[0]['achieved'] else 'Нет'}\n"
+                    )
+                    await callback.message.answer(achievements_message, parse_mode='MarkdownV2')
                 else:
                     await callback.message.answer("Нет данных об игре, возможно вы не смотрели достижения об этой игре на сайте!")
+            else:
+                await callback.message.answer(f"Не удалось получить данные. Статус: {response.status}")
+
+
+async def get_friends_user(message, steam_id):
+    url = 'https://www.munsteam.ru/friends/api/friends/'
+    params = {'format': 'json', 'steam_id_user': steam_id}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params) as response:
+            if response.status == 200:
+                data = await response.json()
+                data_dicts = [i for i in data[0]['friends_info']]
+                if data:
+                    await message.answer(f'Выберите игру по которой хотите получить достижения!', reply_markup=friends_keyboard(data_dicts))
+                else:
+                    await message.answer("Не получилось получить данные :(")
+            else:
+                await message.answer(f"Не удалось получить данные. Статус: {response.status}")
+
+
+async def get_friends_info(callback, steam_id):
+    url = 'https://www.munsteam.ru/friends/api/friends/'
+    params = {'format': 'json', 'steam_id_user': steam_id}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params) as response:
+            if response.status == 200:
+                data = await response.json()
+                data_dicts = [i for i in data[0]['friends_info'] for k, v in i.items() if v == callback.data[6:]]
+                if data:
+                    message_text = (
+                        f"*Имя Steam:* [{data_dicts[0]['personaname']}]({data_dicts[0]['profileurl']})\n"
+                        f"*Дружите с:* {datetime.strptime(data_dicts[0]['friend_since'], '%Y-%m-%d %H:%M:%S').strftime('%d %B %Y %H:%M')}\n"
+                    )
+
+                    await callback.message.answer_photo(data_dicts[0]['avatarfull'], caption=message_text, parse_mode='MarkdownV2')
+                else:
+                    await callback.message.answer("Не получилось получить данные :(")
             else:
                 await callback.message.answer(f"Не удалось получить данные. Статус: {response.status}")
