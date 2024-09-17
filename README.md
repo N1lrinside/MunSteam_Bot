@@ -1,8 +1,5 @@
 # MunSteam_tgbot
 
-![Static Badge](https://img.shields.io/badge/%D0%9F%D0%BE%D1%81%D0%BC%D0%BE%D1%82%D1%80%D0%B5%D1%82%D1%8C_%D0%B4%D0%B5%D0%BC%D0%BE%D0%BD%D1%81%D1%82%D1%80%D0%B0%D1%86%D0%B8%D1%8E_%D1%82%D0%B5%D0%BB%D0%B5%D0%B3%D1%80%D0%B0%D0%BC_%D0%B1%D0%BE%D1%82%D0%B0-blue?link=https%3A%2F%2Ft.me%2Feasyoffer_bot)
-
-
 **MunSteam_tgbot** – telegram бот, который собирает данные пользователя, благодаря api munsteam.ru
 
 ## Установка
